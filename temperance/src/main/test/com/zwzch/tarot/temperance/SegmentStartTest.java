@@ -10,10 +10,11 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:application.xml"})
-public class TemperanceStartTest {
+public class SegmentStartTest {
 
     @Autowired
     ISeq seq;
+
 
     @Test
     public void testSeq() throws Exception {

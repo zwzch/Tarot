@@ -19,12 +19,15 @@
         <property name="validationQuery" value="select 1 "/>
     </bean>
 
-    <bean id="segmentService" class="com.zwzch.tarot.temperance.segment.dao.SegmentDaoImpl">
+    <bean id="segmentDao" class="com.zwzch.tarot.temperance.segment.dao.SegmentDaoImpl">
         <constructor-arg ref="dataSource"/>
     </bean>
 
-    <bean name="leaf" class="com.zwzch.tarot.temperance.segment.SegmentSeqImpl" init-method="init">
-        <property name="segmentDao" ref="segmentService"/>
+    <bean name="segmentService" class="com.zwzch.tarot.temperance.segment.SegmentSeqImpl" init-method="init">
+        <property name="segmentDao" ref="segmentDao"/>
+    </bean>
+
+    <bean name="snowflakeService" class="com.zwzch.tarot.temperance.snowflake.SnowFlakeSeqImpl" init-method="init">
     </bean>
 
 </beans>
