@@ -6,7 +6,17 @@
 
     <groupId>tarot-parent</groupId>
     <artifactId>com.zwzch.tarot</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <version>release</version>
+    <modules>
+        <module>fool</module>
+        <module>temperance</module>
+    </modules>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>1.5.18.RELEASE</version>
+    </parent>
 
 
 </project>
