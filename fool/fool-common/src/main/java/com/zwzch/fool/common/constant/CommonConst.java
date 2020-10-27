@@ -29,4 +29,7 @@ public class CommonConst {
     public static final String DEFAULT_POOL_MAXLIFETIME = "28800000";
 
     public static final String NAME_STR = "name";
+
+    public static final String DEFAULT_TIME_FORMAT = "###yyyy#MM#dd#HH#mm#ss#SSS###";
+    public static final String COMMAND_ALTER_TABLE_STR = "ALTER TABLE";
 }

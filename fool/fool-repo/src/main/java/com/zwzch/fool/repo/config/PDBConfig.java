@@ -1,10 +1,16 @@
 package com.zwzch.fool.repo.config;
 
-import com.sun.tools.javac.util.Assert;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.zwzch.fool.common.constant.CommonConfig;
 import com.zwzch.fool.common.constant.CommonConst;
+import com.zwzch.fool.common.exception.CommonExpection;
+import com.zwzch.fool.common.utils.JsonUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,7 +35,6 @@ public class PDBConfig {
     public CommonConst commonConst;
 
     public PDBConfig(Map<String, String> param, CommonConfig commonConfig) {
-        Assert.checkNonNull(param);
         this.paramMap = new HashMap<String, String>();
 
         for(String key : param.keySet()) {
@@ -116,5 +121,35 @@ public class PDBConfig {
 
     public void setNeedToConnect(boolean needToConnect) {
         this.needToConnect = needToConnect;
+    }
+
+    public static List<PDBConfig> loadConfg(JsonArray pdbJsonArray, CommonConfig commonConfig) {
+        List<PDBConfig> pdbConfigList = new ArrayList<PDBConfig>();
+        for (JsonElement pdbJsonElement: pdbJsonArray) {
+            JsonObject pdbJsonObject = JsonUtils.getAsObject(pdbJsonElement);
+
+            /* 获得配置文件中一个pdb配置项目 */
+            Map<String, String> param = new HashMap<String, String>();
+            for(Map.Entry<String, JsonElement> entry : pdbJsonObject.entrySet()) {
+                String value = JsonUtils.getStringFromElement(entry.getValue());
+                String key = entry.getKey();
+
+                param.put(key, value);
+            }
+
+            PDBConfig pdbConfig = new PDBConfig(param, commonConfig);
+            /* 检测是否存在同名的后端 */
+            for(PDBConfig pc : pdbConfigList) {
+                if(pc.getName().equals(pdbConfig.getName())) {
+                    throw new CommonExpection("PDBConfig loadConfig - two pdb have same name - name:" + pc.getName());
+                }
+            }
+            pdbConfigList.add(pdbConfig);
+        }
+        return pdbConfigList;
+    }
+
+    public Map<String, String> getParam() {
+        return this.paramMap;
     }
 }

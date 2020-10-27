@@ -4,6 +4,11 @@ public class AccountPair {
     private String user;
     private String password;
 
+    public AccountPair(String user, String password) {
+        this.user = user;
+        this.password = password;
+    }
+
     public String getUser() {
         return user;
     }

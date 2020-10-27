@@ -1,6 +1,8 @@
 package com.zwzch.fool.repo.expection;
 
-public class PdbRuntimeException extends Exception {
+import com.zwzch.fool.common.exception.CommonExpection;
+
+public class PdbRuntimeException extends CommonExpection {
     public PdbRuntimeException() {
         super();
     }

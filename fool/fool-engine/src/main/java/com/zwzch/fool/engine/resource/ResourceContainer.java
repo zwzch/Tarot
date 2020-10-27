@@ -12,9 +12,11 @@ import com.zwzch.fool.common.lifecycle.AbstractLifecycle;
 import com.zwzch.fool.common.utils.JsonUtils;
 import com.zwzch.fool.engine.config.EngineConfig;
 import com.zwzch.fool.repo.Repo;
+import com.zwzch.fool.rule.Rule;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ResourceContainer extends AbstractLifecycle implements IBase {
     private String ldbName = null;          /* 逻辑库名 */
@@ -67,10 +69,15 @@ public class ResourceContainer extends AbstractLifecycle implements IBase {
     }
 
     private void connectToBackend(Map<String, Object> resource) {
+        Repo repo = getRepo(resource);
+        repo.connToBackend();
     }
 
     private void setAndcheckConfig(Map<String, Object> resource) {
         Repo repo = getRepo(resource);
+        Rule rule = getRule(resource);
+        Set<String> sliceNameSet = repo.getSliceNameSet();
+
     }
 
     public Repo getRepo(Map<String, Object> map) {
@@ -79,6 +86,24 @@ public class ResourceContainer extends AbstractLifecycle implements IBase {
             return (Repo) obj;
         } else {
             throw new ConfigException("ResourceContainer getRepo - object is not REPO");
+        }
+    }
+
+    public Rule getRule(Map<String, Object> map) {
+        Object obj = map.get(CommonConst.RULE_STR);
+        if (obj != null && obj instanceof Rule) {
+            return (Rule) obj;
+        } else {
+            throw new ConfigException("ResourceContainer getRepo - object is not REPO");
+        }
+    }
+
+    public EngineConfig getEngineConfig(Map<String, Object> map) {
+        Object obj = map.get(CommonConst.ENG_STR);
+        if(obj!=null && obj instanceof EngineConfig) {
+            return (EngineConfig)obj;
+        } else {
+            throw new ConfigException("ResourceContainer getEngineConfig - object is not EngineConfig");
         }
     }
 
@@ -123,4 +148,47 @@ public class ResourceContainer extends AbstractLifecycle implements IBase {
     public void setWaitOldTime(int waitOldTime) {
         this.waitOldTime = waitOldTime;
     }
+
+    public String getLdbName() {
+        return ldbName;
+    }
+
+    public void setLdbName(String ldbName) {
+        this.ldbName = ldbName;
+    }
+
+    public String getLogicUser() {
+        return logicUser;
+    }
+
+    public void setLogicUser(String logicUser) {
+        this.logicUser = logicUser;
+    }
+
+    public String getLogicPassword() {
+        return logicPassword;
+    }
+
+    public void setLogicPassword(String logicPassword) {
+        this.logicPassword = logicPassword;
+    }
+
+    public Map<String, IConfigLoader> getConfMap() {
+        return confMap;
+    }
+
+    public void setConfMap(Map<String, IConfigLoader> confMap) {
+        this.confMap = confMap;
+    }
+
+    public Map<String, Object> getContainer() {
+        return container;
+    }
+
+    public void setContainer(Map<String, Object> container) {
+        this.container = container;
+    }
+
+    public Map<String, Object> getResource() { return this.container; }
+
 }

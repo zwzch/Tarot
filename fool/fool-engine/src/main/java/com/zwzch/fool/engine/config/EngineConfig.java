@@ -1,9 +1,15 @@
 package com.zwzch.fool.engine.config;
 
+import com.alibaba.cobar.parser.ast.stmt.SQLStatement;
+import com.alibaba.cobar.parser.ast.stmt.ddl.DDLCreateTableStatement;
 import com.google.gson.JsonObject;
 import com.zwzch.fool.common.constant.CommonConfig;
 import com.zwzch.fool.common.exception.ConfigException;
 import com.zwzch.fool.common.utils.JsonUtils;
+import com.zwzch.fool.engine.router.ParseManager;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class EngineConfig {
     private CommonConfig commonConfig;
@@ -24,6 +30,8 @@ public class EngineConfig {
     private boolean logOriginSql = false;
 
     private boolean logActualSql = false;
+    private Map<String, SQLConfig> sqlConfigMap = new HashMap<String, SQLConfig>();
+
 
 
     // 记录非标SQL
@@ -50,6 +58,16 @@ public class EngineConfig {
         if (JsonUtils.isExist(rootObject, LOGACTUALSQL)) {
             logActualSql = JsonUtils.getBoolFromObject(rootObject, LOGACTUALSQL);
         }
+    }
+
+    /* 判断sql是否被配置 */
+    public boolean isConfigSql(SQLStatement sqlStatement) {
+        if(sqlStatement instanceof DDLCreateTableStatement) {   // cobar中的create命令output过程没有完善，所以这里直接跳过
+            return false;
+        }
+
+        String sqlStr = ParseManager.getFormatSql(sqlStatement);
+        return sqlConfigMap.containsKey(sqlStr);
     }
 
     public int getBatchLimit() {

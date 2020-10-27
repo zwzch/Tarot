@@ -1,5 +1,6 @@
 package com.zwzch.fool.common.utils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -104,5 +105,59 @@ public class JsonUtils {
         }
     }
 
+    public static JsonArray getArrayFromObject(JsonObject jsonObject, String name) throws CommonExpection {
+        if(jsonObject==null || name==null) {
+            throw new CommonExpection("param is null, name:" + name);
+        }
 
+        if(jsonObject.getAsJsonArray(name) == null) {
+            throw new CommonExpection("json get null entry, name:" + name);
+        } else {
+            return jsonObject.getAsJsonArray(name);
+        }
+    }
+
+    public static JsonObject getAsObject(JsonElement jsonElement) throws CommonExpection {
+        if(jsonElement == null) {
+            throw new CommonExpection("jsonElement is null");
+        }
+
+        try {
+            if(jsonElement.getAsJsonObject() == null) {
+                throw new CommonExpection("json get null entry");
+            } else {
+                return jsonElement.getAsJsonObject();
+            }
+        } catch(Exception e) {
+            throw new CommonExpection("json Exception", e);
+        }
+    }
+
+    public static String getStringFromElement(JsonElement jsonElement) throws CommonExpection {
+        if(jsonElement == null) {
+            throw new CommonExpection("jsonElement is null");
+        }
+
+        try {
+            if(jsonElement.getAsString() == null) {
+                throw new CommonExpection("json get null entry");
+            } else {
+                return jsonElement.getAsString().trim();
+            }
+        } catch (Exception e) {
+            throw new CommonExpection("json Exception", e);
+        }
+    }
+
+    public static JsonObject getObjectFromObject(JsonObject jsonObject, String name) throws CommonExpection {
+        if(jsonObject==null || name==null) {
+            throw new CommonExpection("param is null, name:" + name);
+        }
+
+        if(jsonObject.getAsJsonObject(name) == null) {
+            throw new CommonExpection("json get null entry, name:" + name);
+        } else {
+            return jsonObject.getAsJsonObject(name);
+        }
+    }
 }

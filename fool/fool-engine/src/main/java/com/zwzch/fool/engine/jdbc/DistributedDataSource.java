@@ -1,9 +1,15 @@
 package com.zwzch.fool.engine.jdbc;
 
 import com.zwzch.fool.common.IBase;
+import com.zwzch.fool.common.constant.CommonConfig;
+import com.zwzch.fool.common.constant.CommonConst;
 import com.zwzch.fool.common.lifecycle.AbstractLifecycle;
 import com.zwzch.fool.common.utils.FileUtils;
+import com.zwzch.fool.engine.config.EngineConfigLoader;
+import com.zwzch.fool.engine.executor.DistributedExecutor;
 import com.zwzch.fool.engine.resource.ResourceContainer;
+import com.zwzch.fool.repo.config.RepoConfigLoader;
+import com.zwzch.fool.rule.config.RuleConfigLoader;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -23,21 +29,40 @@ public class DistributedDataSource extends AbstractLifecycle implements DataSour
     private int waitOldTime = 10000;
     private boolean disConnMysql = false;
     private int batchLimit = -1;
-    private Map<String, String> pdbParam = new HashMap<String, String>();
+    private int threadPoolSize = 100;
+    private boolean parallelExecute = false;
+    private int slaveFirstPeriod = 0;
+    private int slaveFirstThresholdValue = 2;
 
+    private Map<String, String> pdbParam = new HashMap<String, String>();
+    private ResourceContainer resourceContainer=null;
+    private DistributedExecutor executor = null;
     protected void doInit() {
         ResourceContainer rc = new ResourceContainer();
-
+        rc.addIConfig(CommonConst.RULE_STR, new RuleConfigLoader());
+        rc.addIConfig(CommonConst.REPO_STR, new RepoConfigLoader());
+        rc.addIConfig(CommonConst.ENG_STR, new EngineConfigLoader());
         rc.setConfigStr(configStr);
         rc.setPdbParam(pdbParam);
         rc.setBatchLimit(batchLimit);
         rc.setDisConnMysql(disConnMysql);
         rc.setWaitOldTime(waitOldTime);
+        rc.setLogicUser(logicAccountName);
+        rc.setLogicPassword(logicAccountPass);
+        rc.setLdbName(logicDBName);
+        rc.setPdbParam(pdbParam);
+        rc.setWaitOldTime(waitOldTime);
+        rc.setDisConnMysql(disConnMysql);
+        rc.setBatchLimit(batchLimit);
         rc.init();
+        this.resourceContainer = rc;
+        //TOCO 统计连接池和线程池
+        executor = new DistributedExecutor(threadPoolSize);
+        executor.init();
     }
 
     public Connection getConnection() throws SQLException {
-        return null;
+        return new DistributedConnection(this, executor);
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
@@ -139,4 +164,14 @@ public class DistributedDataSource extends AbstractLifecycle implements DataSour
     public void setLogicAccountPass(String logicAccountPass) {
         this.logicAccountPass = logicAccountPass;
     }
+
+    public ResourceContainer getResourceContainer() {
+        return resourceContainer;
+    }
+
+    public void setResourceContainer(ResourceContainer resourceContainer) {
+        this.resourceContainer = resourceContainer;
+    }
+    public boolean isParallelExecute() { return parallelExecute; }
+
 }

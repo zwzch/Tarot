@@ -3,11 +3,14 @@ package com.zwzch.fool.repo.model;
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import com.zwzch.fool.common.IBase;
 import com.zwzch.fool.common.constant.CommonConst;
 import com.zwzch.fool.common.exception.ConfigException;
 import com.zwzch.fool.repo.config.PDBConfig;
+import com.zwzch.fool.repo.expection.PdbRuntimeException;
 
 import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,7 +22,7 @@ import static com.zwzch.fool.common.constant.CommonConst.*;
  * 物理库实体
  *
  * */
-public class PhysicalDB {
+public class PhysicalDB implements IBase {
     private final static String CONNECTION_POOL_SUFFIX = "-connection-pool";
     private static String POOL_PREFIX = "POOL_";
     private static String JDBC_PREFIX = "JDBC_";
@@ -27,8 +30,8 @@ public class PhysicalDB {
     public static final AtomicInteger INDEX = new AtomicInteger(0);
 
     private String name;
-    private String user = "test";
-    private String password = "test";
+    private String user;
+    private String password;
     private String urlStr;
 
     private HikariConfig hikariConfig;
@@ -36,7 +39,7 @@ public class PhysicalDB {
     private HikariDataSource connPool = null;
 
     /** 连接当前状态*/
-    private Object lock = new Object();
+    private final Object lock = new Object();
     private static final int TO_CONNECT = 1;
     private static final int NOT_TO_CONNECT = 2;
     private static final int CONNECTED = 3;
@@ -70,11 +73,12 @@ public class PhysicalDB {
         poolParamMap.put(POOL_MAXLIFETIME, DEFAULT_POOL_MAXLIFETIME);
     }
 
-    public void init(PDBConfig config) {
+    public void init(PDBConfig config, AccountPair accountPair) {
         this.config = config;
         this.name = config.getName();
         this.status = config.isNeedToConnect()? TO_CONNECT: NOT_TO_CONNECT;
-
+        this.user = accountPair.getUser();
+        this.password = accountPair.getPassword();
         //构建连接池
         hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName(CommonConst.MYSQL_DRIVER);
@@ -158,4 +162,99 @@ public class PhysicalDB {
     }
 
 
+    public void connectToServer(boolean isInit) {
+        synchronized (lock) {
+            System.out.println(hikariConfig.getJdbcUrl());
+            connPool = new HikariDataSource(hikariConfig);
+            connPool.setMetricRegistry(metricRegistry);
+            this.status = CONNECTED;
+        }
+    }
+
+    public boolean isConnected() {
+        return this.status== CONNECTED;
+    }
+
+    public void close() {
+        synchronized (lock) {
+            log.info("PHysicalDB close pool - name:" + name);
+            if (connPool != null) {
+                connPool.close();
+                connPool = null;
+            } else {
+                log.warn("PhysicalDB close pool - connPool is null - name:" + name);
+            }
+            status = CLOSED;
+        }
+    }
+
+    public String getIp() { return this.config.getIp(); }
+    public String getPort() { return this.config.getPort(); }
+    public String getDbName() { return this.config.getDbName(); }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getUrlStr() {
+        return urlStr;
+    }
+
+    public void setUrlStr(String urlStr) {
+        this.urlStr = urlStr;
+    }
+
+    public HikariConfig getHikariConfig() {
+        return hikariConfig;
+    }
+
+    public void setHikariConfig(HikariConfig hikariConfig) {
+        this.hikariConfig = hikariConfig;
+    }
+
+    public MetricRegistry getMetricRegistry() {
+        return metricRegistry;
+    }
+
+    public void setMetricRegistry(MetricRegistry metricRegistry) {
+        this.metricRegistry = metricRegistry;
+    }
+
+    public HikariDataSource getConnPool() {
+        return connPool;
+    }
+
+    public void setConnPool(HikariDataSource connPool) {
+        this.connPool = connPool;
+    }
+
+    public Connection getConnection() throws Exception {
+        if (!this.isConnected()) {
+            this.connectToServer(false);
+            if (this.exception != null) {
+                throw new PdbRuntimeException("PhysicalDB getConnection - connectToServer error - name" + this.name, this.exception);
+            }
+        }
+        return this.connPool.getConnection();
+    }
 }
