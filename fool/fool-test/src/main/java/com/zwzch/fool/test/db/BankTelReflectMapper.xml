@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zwzch.fool.test.db.BankTelReflectMapper">
+    <sql id="all_columns">
+        id, card_no, country_code, telephone, req_no, add_time, update_time
+    </sql>
+    <sql id="table_name">
+        bank_tel_reflect
+    </sql>
+
+    <sql id="test_columns">
+        <trim suffixOverrides=",">
+            <if test="id != null">id = #{id},</if>
+            <if test="cardNo != null">card_no = #{cardNo},</if>
+            <if test="countryCode != null">country_code = #{countryCode},</if>
+            <if test="telephone != null">telephone = #{telephone},</if>
+            <if test="reqNo != null">req_no = #{reqNo},</if>
+            <if test="addTime != null">add_time = #{addTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+    </sql>
+
+    <sql id="and_columns">
+        <trim suffixOverrides="AND">
+            <if test="id != null">id = #{id} AND </if>
+            <if test="cardNo != null">card_no = #{cardNo} AND </if>
+            <if test="countryCode != null">country_code = #{countryCode} AND </if>
+            <if test="telephone != null">telephone = #{telephone} AND </if>
+            <if test="reqNo != null">req_no = #{reqNo} AND </if>
+            <if test="addTime != null">add_time = #{addTime} AND </if>
+            <if test="updateTime != null">update_time = #{updateTime} AND</if>
+        </trim>
+    </sql>
+
+    <sql id="set_columns">
+        <trim prefix="set">
+            <include refid="test_columns" />
+        </trim>
+    </sql>
+
+    <insert id="insert" parameterType="tBankTelReflect">
+        INSERT INTO
+        <include refid="table_name"/>
+        <include refid="set_columns"/>
+    </insert>
+
+    <update id="update" parameterType="tBankTelReflect">
+        UPDATE
+        <include refid="table_name" />
+        <include refid="set_columns" />
+        WHERE
+        card_no = #{cardNo}
+    </update>
+
+
+    <insert id="insertOrUpdate" parameterType="tBankTelReflect" >
+        insert into <include refid="table_name" />
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="cardNo != null">card_no,</if>
+            <if test="countryCode != null">country_code,</if>
+            <if test="telephone != null">telephone,</if>
+            <if test="reqNo != null">req_no,</if>
+            <if test="addTime != null">add_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="countryCode != null">#{countryCode},</if>
+            <if test="telephone != null">#{telephone},</if>
+            <if test="cardNo != null">#{cardNo},</if>
+            <if test="reqNo != null">#{reqNo},</if>
+            <if test="addTime != null">#{addTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+        ON DUPLICATE KEY UPDATE
+        <trim suffixOverrides="," >
+            <if test="id != null">id = #{id},</if>
+            <if test="telephone != null">telephone = #{telephone},</if>
+            <if test="countryCode != null">country_code = #{countryCode},</if>
+            <if test="reqNo != null">req_no = #{reqNo},</if>
+            <if test="addTime != null">add_time = #{addTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+    </insert>
+
+    <delete id="delete" parameterType="tBankTelReflect">
+        DELETE FROM
+        <include refid="table_name" />
+        WHERE
+        <include refid="and_columns" />
+    </delete>
+
+    <select id="selectByCardNo" resultType="tBankTelReflect">
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+        <include refid="table_name"/>
+        WHERE
+        card_no = #{cardNo}
+    </select>
+
+    <select id="selectByCardNoAndTel" resultType="tBankTelReflect">
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+        <include refid="table_name"/>
+        WHERE
+        card_no = #{cardNo} AND
+        country_code = #{countryCode} AND
+        telephone = #{telephone}
+    </select>
+</mapper>

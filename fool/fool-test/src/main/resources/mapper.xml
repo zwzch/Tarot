@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+
+    <bean id="dataSource4Calibration" class="com.zwzch.fool.engine.jdbc.DistributedDataSource" init-method="init" destroy-method="destroy">
+        <property name="logicDBName" value="CALIBRATION_CENTER_APP"/>
+        <property name="logicAccountName" value="calibration_"/>
+        <property name="logicAccountPass" value="calibration_"/>
+        <property name="configStr" value="db.json"/>
+<!--        <property name="parallelExecute" value="true" />-->
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource4Calibration"/>
+        <property name="configLocation" value="classpath:mapper-config.xml"/>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.zwzch.fool.test.db"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+</beans>

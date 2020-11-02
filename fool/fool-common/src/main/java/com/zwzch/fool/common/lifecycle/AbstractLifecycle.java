@@ -4,6 +4,7 @@ public class AbstractLifecycle implements Lifecycle {
     private final Object lock = new Object();
     protected volatile boolean isInited = false;
 
+    @Override
     public void init() {
         synchronized (lock) {
             if (isInited()) {
@@ -14,7 +15,8 @@ public class AbstractLifecycle implements Lifecycle {
         }
     }
 
-    public void destory() {
+    @Override
+    public void destroy() {
         synchronized (lock) {
             if (!isInited()) {
                 return;
@@ -24,6 +26,7 @@ public class AbstractLifecycle implements Lifecycle {
         }
     }
 
+    @Override
     public boolean isInited() {
         return this.isInited;
     }

@@ -150,9 +150,9 @@ public class Session implements IBase {
         String dbKey = null;
         if (actualSql.isToSlave()) {
             toSlave = true;
-            dbKey = conn.getRepo().getMasterPDBId(dbGroupKey);
-        } else {
             dbKey = conn.getRepo().getSlavePDBId(dbGroupKey);
+        } else {
+            dbKey = conn.getRepo().getMasterPDBId(dbGroupKey);
         }
         return dbKey;
     }

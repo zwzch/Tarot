@@ -41,7 +41,5 @@
             <version>release</version>
             <scope>compile</scope>
         </dependency>
-
-
     </dependencies>
 </project>

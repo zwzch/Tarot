@@ -4,7 +4,7 @@ public interface Lifecycle {
 
     void init();
 
-    void destory();
+    void destroy();
 
     boolean isInited();
 }

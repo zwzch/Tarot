@@ -59,8 +59,9 @@ public class DataSourceTest {
         ResultSet rs = null;
         try {
             //select
-            String sql = "SELECT * FROM slide_image_record LIMIT 0, 100";
-
+//            String sql = "SELECT * FROM slide_image_record LIMIT 0, 100";
+            //update
+            String sql = "update slide_image_record set ticket = 'false' where req_no='eafb15b4b91f409c862abebd12664767';";
             conn = ds.getConnection();
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();

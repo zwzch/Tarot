@@ -144,7 +144,7 @@ public final class SQLParserDelegate {
                 throw new SQLSyntaxErrorException("sql is not a supported statement");
         }
         if (isEOF) {
-            while (lexer.token() == MySQLToken.PUNC_SEMICOLON) {
+            while (lexer.token() == MySQLToken.PUNC_SEMICOLON|| lexer.token() == MySQLToken.PUNC_COMMA) {
                 lexer.nextToken();
             }
         }

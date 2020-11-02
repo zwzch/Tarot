@@ -208,7 +208,7 @@ public class ProcessorUtil {
 
         ActualSql actualSql = new ActualSql();
         actualSql.setNewSql(actualSqlStr);
-        actualSql.setParamIndexs(parseItem.getUpdateParamIndexs());
+        actualSql.setParamIndexs(parseItem.getParameterIndexs());
         actualSql.setUpdateIndexs(parseItem.getUpdateParamIndexs());
 
         actualSql.setSqlType(sqlObject.getParseResult().getSqlType());

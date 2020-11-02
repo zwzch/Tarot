@@ -65,14 +65,17 @@ public class Rule implements IRule, IBase {
         return lt.isSharding();
     }
 
+    @Override
     public String getSingleSliceId() {
         return null;
     }
 
+    @Override
     public String getSingleTableSliceId(String logicTableName) {
         return null;
     }
 
+    @Override
     public List<RuleItem> route(String logicTableName, SqlType sqlType, IRuleParam comp, Map<String, String> asTableMap) {
         if(!isSharding) {
             throw new RuleRuntimeException("Rule route - not sharding - tableName:" + logicTableName + ",param:" + comp);

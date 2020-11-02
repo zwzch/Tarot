@@ -13,6 +13,7 @@ import com.zwzch.fool.engine.exception.NotSupportSQLException;
 import com.zwzch.fool.engine.model.Parameter;
 import com.zwzch.fool.engine.router.model.ParseItem;
 import com.zwzch.fool.rule.param.IRuleParam;
+import com.zwzch.fool.rule.param.RuleParamAnd;
 import com.zwzch.fool.rule.param.RuleParamSimple;
 
 import java.sql.SQLException;
@@ -83,20 +84,20 @@ public class GetRuleParamVisitor extends EmptySQLASTVisitor{
 
 	}
 
-//	@Override
-//	public void visit(DMLInsertStatement node) {
-//        // 暂时不支持子表的查询
-//        QueryExpression subQuery = node.getSelect();
-//        if (subQuery != null) {
-//            throw new NotSupportSQLException("could not support insert into select");
-//        }
-//
-//		ruleParams = getRuleParamForInsertReplace(node.getColumnNameList(),
-//				node.getRowList(), parseItem.getInSqlIndex(),
-//				parseItem.getSqlObject().getParameterMap(),
-//				parseItem.getSeqResult());
-//	}
-//
+	@Override
+	public void visit(DMLInsertStatement node) {
+        // 暂时不支持子表的查询
+        QueryExpression subQuery = node.getSelect();
+        if (subQuery != null) {
+            throw new NotSupportSQLException("could not support insert into select");
+        }
+
+		ruleParams = getRuleParamForInsertReplace(node.getColumnNameList(),
+				node.getRowList(), parseItem.getInSqlIndex(),
+				parseItem.getSqlObject().getParameterMap(),
+				null);
+	}
+
 //	@Override
 //	public void visit(DMLReplaceStatement node) {
 //        // 暂时不支持子表的查询
@@ -112,34 +113,34 @@ public class GetRuleParamVisitor extends EmptySQLASTVisitor{
 //	}
 
 
-//	private IRuleParam getRuleParamForInsertReplace(List<Identifier> columnList,
-//													List<RowExpression> rowExpressions, int index,
-//													Map<Integer, Parameter> parameterMap,
-//													SeqResult seqResult) {
-//		List<Expression> expressionList = rowExpressions.get(index).getRowExprList();
-//
-//		if(columnList.size() == 1 && seqResult==null){
-//			ExpressionVisitor ev = new ExpressionVisitor(parameterMap, parseItem.getSqlObject().getParseResult().getAsTableMap());
-//			expressionList.get(0).accept(ev);
-//
-//			RuleParamSimple simple = new RuleParamSimple();
-//			simple.setLeft(columnList.get(0).getIdTextUpUnescape(), IRuleParam.TYPE.COLUMN);;
-//			simple.setOp(IRuleParam.OPERATION.EQ);
-//			simple.setRight(ev.getValue(), ev.getType());
-//			return simple;
-//		} else {
-//			RuleParamAnd and = new RuleParamAnd();
-//			for(int i=0; i<columnList.size(); i++) {
-//				ExpressionVisitor ev = new ExpressionVisitor(parameterMap, parseItem.getSqlObject().getParseResult().getAsTableMap());
-//				expressionList.get(i).accept(ev);
-//
-//				RuleParamSimple simple = new RuleParamSimple();
-//				simple.setLeft(columnList.get(i).getIdTextUpUnescape(), IRuleParam.TYPE.COLUMN);
-//				simple.setOp(IRuleParam.OPERATION.EQ);
-//				simple.setRight(ev.getValue(), ev.getType());
-//				and.addComparative(simple);
-//			}
-//
+	private IRuleParam getRuleParamForInsertReplace(List<Identifier> columnList,
+													List<RowExpression> rowExpressions, int index,
+													Map<Integer, Parameter> parameterMap,
+													Object seqResult) {
+		List<Expression> expressionList = rowExpressions.get(index).getRowExprList();
+
+		if(columnList.size() == 1 && seqResult==null){
+			ExpressionVisitor ev = new ExpressionVisitor(parameterMap, parseItem.getSqlObject().getParseResult().getAsTableMap());
+			expressionList.get(0).accept(ev);
+
+			RuleParamSimple simple = new RuleParamSimple();
+			simple.setLeft(columnList.get(0).getIdTextUpUnescape(), IRuleParam.TYPE.COLUMN);;
+			simple.setOp(IRuleParam.OPERATION.EQ);
+			simple.setRight(ev.getValue(), ev.getType());
+			return simple;
+		} else {
+			RuleParamAnd and = new RuleParamAnd();
+			for(int i=0; i<columnList.size(); i++) {
+				ExpressionVisitor ev = new ExpressionVisitor(parameterMap, parseItem.getSqlObject().getParseResult().getAsTableMap());
+				expressionList.get(i).accept(ev);
+
+				RuleParamSimple simple = new RuleParamSimple();
+				simple.setLeft(columnList.get(i).getIdTextUpUnescape(), IRuleParam.TYPE.COLUMN);
+				simple.setOp(IRuleParam.OPERATION.EQ);
+				simple.setRight(ev.getValue(), ev.getType());
+				and.addComparative(simple);
+			}
+
 //			if(seqResult!=null) {
 //				RuleParamSimple simple = new RuleParamSimple();
 //				simple.setLeft(seqResult.getKey(), IRuleParam.TYPE.COLUMN);
@@ -147,10 +148,10 @@ public class GetRuleParamVisitor extends EmptySQLASTVisitor{
 //				simple.setRight(seqResult.getValue(), IRuleParam.TYPE.INT);
 //				and.addComparative(simple);
 //			}
-//
-//			return and;
-//		}
-//	}
+
+			return and;
+		}
+	}
 
 	public IRuleParam getRuleParams() {
 		return ruleParams;

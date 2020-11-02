@@ -8,6 +8,9 @@ import com.zwzch.fool.common.exception.CommonExpection;
 import com.zwzch.fool.common.model.SqlType;
 import com.zwzch.fool.engine.model.SqlObject;
 import com.zwzch.fool.engine.processor.readProcessor.SelectProcessor;
+import com.zwzch.fool.engine.processor.writeProcessor.DeleteProcessor;
+import com.zwzch.fool.engine.processor.writeProcessor.InsertProcessor;
+import com.zwzch.fool.engine.processor.writeProcessor.UpdateProcessor;
 import com.zwzch.fool.engine.router.model.ParseResult;
 
 import java.sql.SQLException;
@@ -39,6 +42,12 @@ public class ProcessorFactory {
         switch (sqlType) {
             case SELECT:
                 return new SelectProcessor(sqlObject);
+            case INSERT:
+                return new InsertProcessor(sqlObject);
+            case UPDATE:
+                return new UpdateProcessor(sqlObject);
+            case DELETE:
+                return new DeleteProcessor(sqlObject);
             default:
                 throw new SQLException("unsupported sql type : " + sqlType.toString());
 

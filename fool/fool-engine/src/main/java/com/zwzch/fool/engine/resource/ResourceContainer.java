@@ -191,4 +191,7 @@ public class ResourceContainer extends AbstractLifecycle implements IBase {
 
     public Map<String, Object> getResource() { return this.container; }
 
+    public void closeResource() {
+        getRepo(container).close();
+    }
 }

@@ -29,6 +29,7 @@ public class Repo implements IRepo, IBase {
      * @param sliceName slice名称
      * @param isUpdate 是否是更新语句
      * */
+    @Override
     public String selectPDBId(String sliceName, boolean isUpdate) throws CommonExpection {
         if (null != sliceName && this.sliceMap.containsKey(sliceName)) {
             String pdbName = ((Slice)this.sliceMap.get(sliceName)).getPDBName(isUpdate);
@@ -179,6 +180,7 @@ public class Repo implements IRepo, IBase {
         return selectPDBId(sliceName, true);
     }
 
+    @Override
     public String getSlavePDBId(String sliceName) throws CommonExpection {
         if (sliceName != null && this.sliceMap.containsKey(sliceName)) {
             Slice slice = (Slice)this.sliceMap.get(sliceName);
@@ -193,6 +195,7 @@ public class Repo implements IRepo, IBase {
         }
     }
 
+    @Override
     public Connection getPhysicalDBConn(String name) throws CommonExpection {
         PhysicalDB pdb = this.getPhysicalDB(name);
 
@@ -203,6 +206,7 @@ public class Repo implements IRepo, IBase {
         }
     }
 
+    @Override
     public PhysicalDB getPhysicalDB(String name) {
         PhysicalDB pdb = pdbMap.get(name);
         if (null == pdb && (null == name || !this.pdbMap.containsKey(name))) {
@@ -228,5 +232,15 @@ public class Repo implements IRepo, IBase {
         return pdb;
     }
 
+    public void close() {
+        for (String pdbName:pdbMap.keySet()) {
+            PhysicalDB physicalDB = pdbMap.get(pdbName);
+            if (physicalDB == null) {
+                log.warn("repo close get null physicalDB, pdbName:" + pdbName);
+            } else {
+                physicalDB.close();
+            }
+        }
+    }
 
 }

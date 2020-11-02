@@ -356,6 +356,11 @@ public class DistributedConnection implements Connection, IBase {
         }
     }
 
+    public void removeStatement(DistributedStatement statement) {
+        synchronized (this) {
+            distributeStatements.remove(statement);
+        }
+    }
 
     public DistributedDataSource getDataSource() {
         return dataSource;

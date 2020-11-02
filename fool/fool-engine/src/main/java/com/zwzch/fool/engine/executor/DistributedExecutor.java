@@ -10,6 +10,7 @@ import com.zwzch.fool.engine.statisic.SqlStatistics;
 import com.zwzch.fool.engine.executor.Session.Channel;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -32,10 +33,6 @@ public class DistributedExecutor extends AbstractLifecycle implements IBase {
         this.pool = Executors.newFixedThreadPool(size);
     }
 
-    @Override
-    public void destory() {
-        this.pool.shutdown();
-    }
 
     public void execute(List<ActualSql> actualSqls, final Session session, SqlStatistics sqlStatistics, final DistributedStatement statement) throws Exception {
         boolean haveUpdate = false;
@@ -190,7 +187,17 @@ public class DistributedExecutor extends AbstractLifecycle implements IBase {
                 actualSql.setResultSet(ps.getResultSet());
             } else {
                 //update
-
+                int updateCount = ps.getUpdateCount();
+                if (updateCount == -1) {
+                    throw new SQLException("getResult actualSqls.size() > ps.size()");
+                }
+                actualSql.setUpdateCount(ps.getUpdateCount());
+                if (actualSql.getInsertId() == -1) {
+                    ResultSet rs = ps.getGeneratedKeys();
+                    while (rs.next()) {
+                        actualSql.addInsertId(rs.getLong(1));
+                    }
+                }
             }
             isRs = ps.getMoreResults(Statement.KEEP_CURRENT_RESULT);
         }
@@ -215,5 +222,7 @@ public class DistributedExecutor extends AbstractLifecycle implements IBase {
         }
 
     }
+
+
 }
 

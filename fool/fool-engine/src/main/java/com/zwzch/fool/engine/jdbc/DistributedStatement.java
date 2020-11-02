@@ -1,5 +1,6 @@
 package com.zwzch.fool.engine.jdbc;
 
+import com.zwzch.fool.common.IBase;
 import com.zwzch.fool.engine.model.Parameter;
 import com.zwzch.fool.engine.model.SqlObject;
 import com.zwzch.fool.engine.processor.Processor;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DistributedStatement implements Statement {
+public class DistributedStatement implements Statement, IBase {
 
     public DistributedConnection conn;
 
@@ -29,6 +30,13 @@ public class DistributedStatement implements Statement {
      */
     protected boolean closed = false;
     protected List<SqlObject> sqlObjectList = new ArrayList<SqlObject>();    /* 传入内部处理的结构，表示单次execute的参数 */
+
+    ResultSet resultSet;
+    /**
+     * 更新计数，如果执行了多次，那么这个值只会返回最后一次执行的结果。 如果是一个query，那么返回的数据应该是-1
+     */
+    protected int updateCount = -1;
+    protected int[] updateCountForBatch = new int[0];
 
     public DistributedStatement(DistributedConnection conn) {
         this.conn = conn;
@@ -48,12 +56,28 @@ public class DistributedStatement implements Statement {
         return 0;
     }
 
-    public void executeCore() {
 
-    }
     @Override
     public void close() throws SQLException {
+        if (!this.closed && conn != null && processor != null) {
+            processor.release();
+            this.closed = true;
+        }
+        releaseAllStatements();
+        this.conn.removeStatement(this);
+    }
 
+    private void releaseAllStatements() {
+        synchronized (this) {
+            for (Statement statement : statements) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    log.warn("关闭statement异常", e);
+                }
+            }
+            statements.clear();
+        }
     }
 
     @Override
@@ -157,16 +181,17 @@ public class DistributedStatement implements Statement {
 
     @Override
     public ResultSet getResultSet() throws SQLException {
-        return null;
+        return this.resultSet;
     }
 
     @Override
     public int getUpdateCount() throws SQLException {
-        return 0;
+        return this.updateCount;
     }
 
     @Override
     public boolean getMoreResults() throws SQLException {
+        this.updateCount = -1;
         return false;
     }
 
@@ -207,7 +232,7 @@ public class DistributedStatement implements Statement {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return null;
+        return this.conn;
     }
 
     @Override
@@ -290,10 +315,12 @@ public class DistributedStatement implements Statement {
         return false;
     }
 
+    @Override
     public void addBatch(String sql) throws SQLException {
         this.sqlObjectList.add(new SqlObject(this, sql, new HashMap<Integer, Parameter>()));
     }
 
+    @Override
     public void clearBatch() throws SQLException {
         this.sqlObjectList = new ArrayList<SqlObject>();
     }
