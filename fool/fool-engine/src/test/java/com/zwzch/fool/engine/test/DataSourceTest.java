@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.zip.CRC32;
 
 
 public class DataSourceTest {
@@ -80,5 +81,14 @@ public class DataSourceTest {
             ps.close();
             conn.close();
         }
+    }
+
+    @Test
+    public void crcTest() {
+        CRC32 crc = new CRC32();
+        crc.reset();
+        crc.update("xxx".getBytes());
+        System.out.println(crc.getValue());
+
     }
 }

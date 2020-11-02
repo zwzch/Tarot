@@ -115,6 +115,7 @@ public class ModFunctionConfig implements IFunctionConfig{
             if (valueType == IRuleParam.TYPE.INT) {
                 return Long.valueOf(param);
             }
+            //sharding key是String 使用CRC计算
             if (valueType == IRuleParam.TYPE.STRING) {
                 CRC32 crc = new CRC32();
                 crc.reset();
