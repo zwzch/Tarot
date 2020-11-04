@@ -37,6 +37,7 @@ public class DistributedStatement implements Statement, IBase {
      */
     protected int updateCount = -1;
     protected int[] updateCountForBatch = new int[0];
+    protected int maxRows = -1;
 
     public DistributedStatement(DistributedConnection conn) {
         this.conn = conn;
@@ -48,12 +49,17 @@ public class DistributedStatement implements Statement, IBase {
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
-        return null;
+        executeCore(sql, new HashMap<Integer, Parameter>());
+        clearBatch();
+        this.resultSet = processor.getResultSet();
+        return this.resultSet;
     }
 
     @Override
     public int executeUpdate(String sql) throws SQLException {
-        return 0;
+        executeCore(sql, new HashMap<Integer, Parameter>());
+        clearBatch();
+        return updateCount = processor.getSingleUpdateCount();
     }
 
 
@@ -82,27 +88,30 @@ public class DistributedStatement implements Statement, IBase {
 
     @Override
     public int getMaxFieldSize() throws SQLException {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setMaxFieldSize(int max) throws SQLException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int getMaxRows() throws SQLException {
-        return 0;
+        return maxRows;
     }
 
     @Override
     public void setMaxRows(int max) throws SQLException {
-
+        if (max == 0) {
+            max = -1;
+        }
+        this.maxRows = max;
     }
 
     @Override
     public void setEscapeProcessing(boolean enable) throws SQLException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -117,22 +126,22 @@ public class DistributedStatement implements Statement, IBase {
 
     @Override
     public void cancel() throws SQLException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public SQLWarning getWarnings() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void clearWarnings() throws SQLException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setCursorName(String name) throws SQLException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override

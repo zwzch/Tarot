@@ -15,10 +15,7 @@ import com.zwzch.fool.repo.IRepo;
 import com.zwzch.fool.rule.IRule;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 public class DistributedConnection implements Connection, IBase {
@@ -66,47 +63,90 @@ public class DistributedConnection implements Connection, IBase {
 
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String nativeSQL(String sql) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
 
+        checkIfclosed();
+        if (session.isAutoCommit() != autoCommit) {
+            this.session.setAutoCommit(autoCommit);
+        }
     }
 
     @Override
     public boolean getAutoCommit() throws SQLException {
-        return false;
+        checkIfclosed();
+        return session.isAutoCommit();
     }
 
     @Override
     public void commit() throws SQLException {
+        checkIfclosed();
+        if (session.isAutoCommit()) {
+            return;
+        }
+        this.session.commit();
 
     }
 
     @Override
     public void rollback() throws SQLException {
-
+        checkIfclosed();
+        if (session.isAutoCommit()) {
+            return;
+        }
+        this.session.rollback();
     }
 
     @Override
     public void close() throws SQLException {
+        if (!this.closed) {
+            this.session.release();
+            this.closed = true;
 
+            synchronized (this) {
+                Iterator<DistributedStatement> iterator = distributeStatements.iterator();
+                while (iterator.hasNext()) {
+                    DistributedStatement statement = iterator.next();
+                    iterator.remove();
+                    statement.close();
+                }
+            }
+        }
     }
 
     @Override
     public boolean isClosed() throws SQLException {
-        return false;
+        return this.closed;
     }
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        return null;
+        checkIfclosed();
+
+        Set<String> dbKeySet = session.getChannelKeys();
+        for (String dbKey : dbKeySet) {
+            Session.Channel channel = session.getChannel(dbKey);
+            return channel.getC().getMetaData();
+        }
+
+        /* 如果没有dbKey,就申请一个,然后立刻释放 */
+        String defaultDb = rule.getSingleSliceId();
+        Session.Channel channel = session.getChannel(defaultDb, false, null);
+        try {
+            return channel.getC().getMetaData();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            session.releaseChannel(channel.getDbKey());
+        }
     }
 
     @Override
@@ -121,12 +161,12 @@ public class DistributedConnection implements Connection, IBase {
 
     @Override
     public void setCatalog(String catalog) throws SQLException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getCatalog() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -146,12 +186,12 @@ public class DistributedConnection implements Connection, IBase {
 
     @Override
     public void clearWarnings() throws SQLException {
-
+        return;
     }
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -161,52 +201,58 @@ public class DistributedConnection implements Connection, IBase {
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Map<String, Class<?>> getTypeMap() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setHoldability(int holdability) throws SQLException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int getHoldability() throws SQLException {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Savepoint setSavepoint() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Savepoint setSavepoint(String name) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void rollback(Savepoint savepoint) throws SQLException {
-
+        checkIfclosed();
+        if (session.isAutoCommit()) {
+            return;
+        }
+        this.session.rollback();
     }
 
     @Override
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        throw new UnsupportedOperationException();
 
     }
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
+
     }
 
     @Override
@@ -216,7 +262,8 @@ public class DistributedConnection implements Connection, IBase {
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
+
     }
 
     @Override
@@ -236,82 +283,87 @@ public class DistributedConnection implements Connection, IBase {
 
     @Override
     public Clob createClob() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Blob createBlob() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public NClob createNClob() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public SQLXML createSQLXML() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setClientInfo(String name, String value) throws SQLClientInfoException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getClientInfo(String name) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Properties getClientInfo() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setSchema(String schema) throws SQLException {
+        throw new UnsupportedOperationException();
 
     }
 
     @Override
     public String getSchema() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException();
+
     }
 
     @Override
     public void abort(Executor executor) throws SQLException {
+        throw new UnsupportedOperationException();
 
     }
 
     @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        throw new UnsupportedOperationException();
 
     }
 
     @Override
     public int getNetworkTimeout() throws SQLException {
-        return 0;
+        throw new UnsupportedOperationException();
+
     }
 
     @Override
@@ -321,7 +373,7 @@ public class DistributedConnection implements Connection, IBase {
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return false;
+        return this.getClass().isAssignableFrom(iface);
     }
 
     public void execute(DistributedStatement statement, boolean isPress) throws SQLException {

@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Session implements IBase {
     private DistributedConnection conn;
@@ -145,6 +146,15 @@ public class Session implements IBase {
         return channel;
     }
 
+    public Channel getChannel(String dbKey) throws SQLException {
+        Channel channel = this.target.get(dbKey);
+        Connection connection = channel.getC();
+        channel.setC(connection);
+
+        return channel;
+    }
+
+
     public String getDBkey(String dbGroupKey, boolean isUpdate, ActualSql actualSql) {
         boolean toSlave = false;
         String dbKey = null;
@@ -155,5 +165,73 @@ public class Session implements IBase {
             dbKey = conn.getRepo().getMasterPDBId(dbGroupKey);
         }
         return dbKey;
+    }
+
+    public void commit() throws SQLException {
+        // commit
+        if (!this.autoCommit) {
+
+            SQLException exception = null;
+            for (Map.Entry<String, Channel> entry : target.entrySet()) {
+                try {
+                    entry.getValue().getC().commit();
+                } catch (SQLException e) {
+                    exception = e;
+                }
+            }
+
+            try {
+                this.release();
+            } catch (SQLException e) {
+                log.error("session release error!", e);
+            }
+
+            if (exception != null) {
+                throw exception;
+            }
+        }
+
+    }
+
+    public void rollback() throws SQLException {
+        // rollback
+        if (!this.autoCommit) {
+
+            SQLException exception = null;
+            for (Map.Entry<String, Channel> entry : target.entrySet()) {
+                try {
+                    entry.getValue().getC().rollback();
+                } catch (SQLException e) {
+                    exception = e;
+                }
+            }
+
+            try {
+                this.release();
+            } catch (SQLException e) {
+                log.error("session release error!", e);
+            }
+
+            if (exception != null) {
+                throw exception;
+            }
+        }
+
+    }
+    public Set<String> getChannelKeys() {
+        return this.target.keySet();
+    }
+
+    public void releaseChannel(String dbKey) {
+        Channel channel = this.target.get(dbKey);
+        if (channel != null) {
+            try {
+                channel.getC().close();
+            } catch (Exception e) {
+                log.warn("releaseChannel error, channel:" + channel, e);
+            }
+
+            this.target.remove(dbKey);
+        }
     }
 }
