@@ -133,35 +133,118 @@ public class Rule implements IRule, IBase {
         }
     }
 
+    @Override
     public List<RuleItem> getFullScanRuleResult(String logicTableName) {
-        return null;
+        LogicTable lt = getLogicTableByName(logicTableName);
+        if(lt == null){
+            throw new RuntimeException("rule error! table not exists! logicTableName:"+logicTableName);
+        }
+        return lt.fullScanRuleResult();
     }
 
+    @Override
     public Map<String, LogicTable> getTableMap() {
-        return null;
+        return this.tables;
     }
 
+    @Override
     public String getSeqName(String logicTableName) {
         return null;
     }
 
+    @Override
     public String getPrimeKey(String logicTableName) {
-        return null;
+        LogicTable lt = getLogicTableByName(logicTableName);
+        if(lt == null){
+            throw new RuntimeException("rule error! table not exists! logicTableName:"+logicTableName);
+        }
+
+        return  lt.getPrimeKey();
     }
 
+    @Override
     public List<String> getShardingKey(String logicTableName) {
-        return null;
+        LogicTable lt = getLogicTableByName(logicTableName);
+        if(lt == null){
+            throw new RuntimeException("rule error! table not exists! logicTableName:"+logicTableName);
+        }
+
+        return lt.getFuncConfig().getShardingKey();
     }
 
+    @Override
     public boolean isEqualMap(List<String> ltNameList) {
         return false;
     }
 
+    @Override
     public Map<String, List<String>> getTopo(String logicTableName) {
-        return null;
+        if (isShardingLogicTable(logicTableName)){
+            return getLogicTableByName(logicTableName).getTopo();
+        } else {
+            Map<String/*sliceName*/,List<String/*物理表名*/>> map = new HashMap<String, List<String>>();
+            List<String> list = new ArrayList<String>();
+            list.add(logicTableName);
+
+            map.put(getSingleTableSliceId(logicTableName), list);
+
+            return map;
+        }
     }
 
     private LogicTable getLogicTableByName(String logicTableName){
         return tables.get(logicTableName);
+    }
+
+    public String getLdbName() {
+        return ldbName;
+    }
+
+    public void setLdbName(String ldbName) {
+        this.ldbName = ldbName;
+    }
+
+    public void setSharding(boolean sharding) {
+        isSharding = sharding;
+    }
+
+    public String getSingleSliceID() {
+        return singleSliceID;
+    }
+
+    public void setSingleSliceID(String singleSliceID) {
+        this.singleSliceID = singleSliceID;
+    }
+
+    public Map<String, LogicTable> getTables() {
+        return tables;
+    }
+
+    public void setTables(Map<String, LogicTable> tables) {
+        this.tables = tables;
+    }
+
+    public RuleConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(RuleConfig config) {
+        this.config = config;
+    }
+
+    public Set<String> getEqualLogicTablePairSet() {
+        return equalLogicTablePairSet;
+    }
+
+    public void setEqualLogicTablePairSet(Set<String> equalLogicTablePairSet) {
+        this.equalLogicTablePairSet = equalLogicTablePairSet;
+    }
+
+    public Set<String> getNotEqualLogicTablePairSet() {
+        return notEqualLogicTablePairSet;
+    }
+
+    public void setNotEqualLogicTablePairSet(Set<String> notEqualLogicTablePairSet) {
+        this.notEqualLogicTablePairSet = notEqualLogicTablePairSet;
     }
 }

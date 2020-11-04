@@ -9,6 +9,7 @@ import com.zwzch.fool.rule.param.IRuleParam;
 import com.zwzch.fool.rule.utils.FunctionUtils;
 import com.zwzch.fool.rule.value.MultiRangeValue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -141,7 +142,7 @@ public class ModFunctionConfig implements IFunctionConfig{
 
     @Override
     public IRuleParam.TYPE getParamType(String column) {
-        return null;
+        return this.valueType;
     }
 
     @Override
@@ -160,12 +161,14 @@ public class ModFunctionConfig implements IFunctionConfig{
 
     @Override
     public int getShardingKeyNum() {
-        return 0;
+        return 1;
     }
 
     @Override
     public List<String> getShardingKey() {
-        return null;
+        List<String> ret = new ArrayList();
+        ret.add(this.shardingKey);
+        return ret;
     }
 
     @Override

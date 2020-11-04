@@ -19,8 +19,8 @@ import java.util.zip.CRC32;
 
 public class DataSourceTest {
     private static String logicDBName = "CALIBRATION_CENTER_APP";
-    private static String logicAccountName = "calibration_";
-    private static String logicAccountPass = "calibration_";
+    private static String logicAccountName = "root";
+    private static String logicAccountPass = "root";
     static DistributedDataSource ds;
 
     @Test
@@ -48,7 +48,7 @@ public class DataSourceTest {
 
     @Test
     public void testQuery() throws SQLException {
-        String configPath = "db.json";
+        String configPath = "test.json";
         ds = new DistributedDataSource();
         ds.setLogicDBName(logicDBName);
         ds.setLogicAccountName(logicAccountName);
@@ -62,7 +62,9 @@ public class DataSourceTest {
             //select
 //            String sql = "SELECT * FROM slide_image_record LIMIT 0, 100";
             //update
-            String sql = "update slide_image_record set ticket = 'false' where req_no='eafb15b4b91f409c862abebd12664767';";
+//            String sql = "update slide_image_record set ticket = 'false' where req_no='eafb15b4b91f409c862abebd12664767';"
+            String sql = "insert into  user_info( user_id, nick_name, telephone)  values ( 1, 'zw', '123')";
+            sql = "select * from user_info where user_id = 1";
             conn = ds.getConnection();
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();

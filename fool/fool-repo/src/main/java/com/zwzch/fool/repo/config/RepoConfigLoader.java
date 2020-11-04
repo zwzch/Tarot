@@ -13,7 +13,7 @@ public class RepoConfigLoader implements IConfigLoader, IBase {
 
 
     public Object buildObject(JsonElement rootEle, String ldbName, String user, String password, Object old, CommonConfig commonConfig) {
-        checkElseThrow(StringUtils.isNoneBlank(ldbName, user, password), new CommonExpection("RepoConfig buildObject - param is null"));
+//        checkElseThrow(StringUtils.isNoneBlank(ldbName, user, password), new CommonExpection("RepoConfig buildObject - param is null"));
         Repo oldRepo = null;
         if(null != old && old instanceof Repo) {
             oldRepo = (Repo)old;

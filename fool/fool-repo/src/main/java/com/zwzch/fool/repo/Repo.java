@@ -243,4 +243,59 @@ public class Repo implements IRepo, IBase {
         }
     }
 
+    public String getLogicUser() {
+        return logicUser;
+    }
+
+    public void setLogicUser(String logicUser) {
+        this.logicUser = logicUser;
+    }
+
+    public Map<String, PhysicalDB> getPdbMap() {
+        return pdbMap;
+    }
+
+    public void setPdbMap(Map<String, PhysicalDB> pdbMap) {
+        this.pdbMap = pdbMap;
+    }
+
+    public Map<String, Slice> getSliceMap() {
+        return sliceMap;
+    }
+
+    public void setSliceMap(Map<String, Slice> sliceMap) {
+        this.sliceMap = sliceMap;
+    }
+
+    public Map<String, String> getSlice2db() {
+        return slice2db;
+    }
+
+    public void setSlice2db(Map<String, String> slice2db) {
+        this.slice2db = slice2db;
+    }
+
+    public RepoConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(RepoConfig config) {
+        this.config = config;
+    }
+
+    public List<String> getInitNameList() {
+        return initNameList;
+    }
+
+    public void setInitNameList(List<String> initNameList) {
+        this.initNameList = initNameList;
+    }
+
+    public AccountPair getAccountPair() {
+        return accountPair;
+    }
+
+    public void setAccountPair(AccountPair accountPair) {
+        this.accountPair = accountPair;
+    }
 }

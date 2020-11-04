@@ -11,6 +11,7 @@
         <module>fool-rule</module>
         <module>fool-parse</module>
         <module>fool-test</module>
+        <module>fool-backstage</module>
     </modules>
     <dependencies>
         <dependency>

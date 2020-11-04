@@ -1,0 +1,100 @@
+{
+  "name": "FOOL",
+  "version": "1",
+  "repo": {
+    "pdb": [
+      {
+        "name": "localdb_3363",
+        "ip": "127.0.0.1",
+        "port": "3306",
+        "dbname": "fool",
+        "POOL_MinimumIdle":"5",
+        "JDBC_characterEncoding":"utf8",
+        "POOL_ConnectionTimeout":"2000",
+        "POOL_IdleTimeout":"120000",
+        "JDBC_socketTimeout":"12000",
+        "POOL_MaximumPoolSize":"10",
+        "JDBC_connectTimeout":"1000"
+      },
+      {
+        "name": "localdb2_3363",
+        "ip": "127.0.0.1",
+        "port": "3306",
+        "dbname": "fool2",
+        "POOL_MinimumIdle":"5",
+        "JDBC_characterEncoding":"utf8",
+        "POOL_ConnectionTimeout":"2000",
+        "POOL_IdleTimeout":"120000",
+        "JDBC_socketTimeout":"12000",
+        "POOL_MaximumPoolSize":"10",
+        "JDBC_connectTimeout":"1000"
+      }
+    ],
+    "slice": [{
+      "name": "FOOL_SLICE",
+      "writer": "localdb_3363:1",
+      "reader": [
+        "localdb_3363:0",
+        "localdb_3363:10"
+      ]
+    }],
+    "account": [
+      {
+        "user":"FOOL_user",
+        "password":"ADDCCD6BC1E48A6A",
+        "backend":[
+          {
+            "db":"localdb_3363",
+            "user":"root",
+            "password":"root"
+          },
+          {
+            "db":"localdb2_3363",
+            "user":"root",
+            "password":"root"
+          }
+        ]
+      }
+    ]
+  },
+  "rule": {
+    "logicTables": [{
+      "isSharding": true,
+      "logicTableName": "user_info",
+      "maxoptablenum": 10,
+      "shardingFunction": "com.zwzch.fool.rule.function.ModFunction",
+      "tablenumlen": 4,
+      "tableprefix": "user_info_",
+      "topo": [{
+        "sliceID": "FOOL_SLICE",
+        "tables": ["0-9"]
+      }],
+      "shardingFunctionData": {
+        "modNum": 10,
+        "numLen": 4,
+        "paramtype": "int",
+        "shardingKey": "user_id",
+        "tableCount": 10,
+        "tableNamePattern": "user_info_{?}"
+      }
+    }],
+    "singleSliceID": "FOOL_SLICE",
+    "isSharding": true
+  },
+  "seq": [],
+  "engine": {
+    "batchLimit":"0",
+    "logOriginSql":false,
+    "logActualSql":false,
+    "quickFuseSwitch":false,
+    "quickFuseMapSize":"10000",
+    "quickFuseClosePeriodTime":"6000",
+    "quickFuseExecTime":"2000",
+    "quickFuseFailPercent":"90",
+    "quickFuseMinCount":"10",
+    "quickFuseOpenPeriodTime":"3000",
+    "quickFuseHalfOpenPeriodTime":"1000",
+    "quickFuseHalfOpenFailPercent":"10",
+    "quickFuseHalfOpenAccessPercent":"10"
+  }
+}

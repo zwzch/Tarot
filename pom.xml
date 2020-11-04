@@ -11,6 +11,7 @@
     <modules>
         <module>fool</module>
         <module>temperance</module>
+        <module>fool/fool-backstage</module>
 
     </modules>
     <parent>
